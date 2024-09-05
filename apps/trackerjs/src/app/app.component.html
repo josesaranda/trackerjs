@@ -1,0 +1,34 @@
+<mat-toolbar class="gap-2">
+  <button mat-icon-button (click)="drawer.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="font-mono">Trackerjs</span>
+  <span class="spacer"></span>
+  <button mat-flat-button (click)="onClickAddProject()">
+    <mat-icon>add</mat-icon>
+    <span>Add project</span>
+  </button>
+</mat-toolbar>
+<mat-drawer-container class="drawer-container">
+  <mat-drawer #drawer class="!bg-slate-100" mode="side" opened>
+    <h2
+      class="flex justify-center items-center !m-0 !text-xl !text-slate-500 !font-mono h-[64px]"
+    >
+      Projects
+    </h2>
+    <mat-divider></mat-divider>
+    <form [formGroup]="form">
+      <mat-selection-list formControlName="project" [multiple]="false">
+        @for (project of projects$ | async; track project.id; let index =
+        $index) {
+        <mat-list-option [value]="project.id" [selected]="index === 0">{{
+          project.name
+        }}</mat-list-option>
+        }
+      </mat-selection-list>
+    </form>
+  </mat-drawer>
+  <div class="drawer-content">
+    <router-outlet></router-outlet>
+  </div>
+</mat-drawer-container>
