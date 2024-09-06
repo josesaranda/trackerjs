@@ -62,7 +62,7 @@ jobs:
       - name: Deploy trackerjs.josesaranda.es
         uses: appleboy/scp-action@v0.1.7
         with:
-          source: dist/apps/trackerjs/browser
+          source: dist
           target: ${{ secrets.DIST_REMOTE }}/trackerjs.josesaranda.es
           host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}

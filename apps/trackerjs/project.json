@@ -10,7 +10,10 @@
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/trackerjs",
+        "outputPath": {
+          "base": "dist",
+          "browser": ""
+        },
         "index": "apps/trackerjs/src/index.html",
         "browser": "apps/trackerjs/src/main.ts",
         "polyfills": ["zone.js"],
