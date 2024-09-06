@@ -1,0 +1,72 @@
+name: Node.js CI
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  install-dependencies:
+    strategy:
+      matrix:
+        node-version: [18.x]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci --force
+
+  build:
+    strategy:
+      matrix:
+        node-version: [18.x]
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Use cached node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Build project
+        run: npm run build
+
+  deploy-prod:
+    strategy:
+      matrix:
+        node-version: [18.x]
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Use cached node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Build project
+        run: npm run build
+      - name: Deploy trackerjs.josesaranda.es
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          source: dist/apps/trackerjs/browser
+          target: ${{ secrets.DIST_REMOTE }}/trackerjs.josesaranda.es
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.PASSWORD }}
+          strip_components: 1
+          rm: true
