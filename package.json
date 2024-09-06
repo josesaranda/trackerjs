@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx run trackerjs:serve"
+    "start": "nx run trackerjs:serve",
+    "build": "nx run trackerjs:build --configuration=production"
   },
   "private": true,
   "dependencies": {

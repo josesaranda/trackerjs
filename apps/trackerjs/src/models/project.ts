@@ -1,6 +1,7 @@
 export interface TimeTrack {
   start: number;
   end?: number;
+  totalTime?: string;
 }
 
 export interface Task {

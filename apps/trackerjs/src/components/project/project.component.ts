@@ -7,8 +7,10 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddTaskComponent } from '../task/add-task.component';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { Task, TimeTrack } from '../../models/project';
+import { TitleService } from '../../services/title.service';
 
 @Component({
   standalone: true,
@@ -27,8 +29,7 @@ import { Task, TimeTrack } from '../../models/project';
   template: `
     <mat-toolbar class="gap-2 !bg-slate-200">
       @if(project$ | async; as project) {
-      <span class="!text-sm">Project:</span
-      ><span class="font-mono !text-md">{{ project.name }}</span>
+      <span class="font-mono !text-md">{{ project.name }}</span>
       }
       <span class="spacer"></span>
       <span class="!text-lg">Time tracked: {{ totalTime }}</span>
@@ -41,16 +42,32 @@ import { Task, TimeTrack } from '../../models/project';
       <h3 class="!text-lg">Tasks:</h3>
       <mat-accordion>
         @for (task of tasks; track task.id; let index = $index) {
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title> {{ task.name }} </mat-panel-title>
+        <mat-expansion-panel
+          [class.animation-highlight]="
+            task.time[0]?.start && !task.time[0]?.end
+          "
+        >
+          <mat-expansion-panel-header
+            class="!border-b-[1px] !border-solid !rounded-b-none !border-b-[var(--mat-expansion-actions-divider-color)]"
+          >
+            <mat-panel-title>
+              <div class="w-[24px] h-[24px] mr-2">
+                @if(task.time[0]?.start && !task.time[0]?.end){
+                <mat-icon class="animation-rotate">autorenew</mat-icon>
+                } @else {
+                <mat-icon>notes</mat-icon>
+                }
+              </div>
+              {{ task.name }}
+            </mat-panel-title>
             <mat-panel-description>
               <span class="mr-4 flex justify-center items-start gap-2">
                 <mat-icon>access_time</mat-icon> {{ task.totalTime }}</span
               >
             </mat-panel-description>
           </mat-expansion-panel-header>
-          <p class="font-bold">Time:</p>
+
+          <p class="font-bold !mt-4">Time:</p>
           <div class="flex justify-start items-center flex-wrap gap-2">
             @for(time of task.time; track time;) {
             <ul class="my-2 p-2 bg-slate-100 rounded-md">
@@ -92,24 +109,57 @@ import { Task, TimeTrack } from '../../models/project';
     .spacer {
       flex: 1 1 auto;
     }
+
+    .animation-highlight {
+      animation: blink 4.5s linear infinite;
+    }
+
+    .animation-rotate {
+      animation: spin 2.5s linear infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% {@apply bg-slate-100;}
+      50% {@apply bg-slate-300;}
+    }
+
+    @keyframes spin { 
+    100% { 
+        -webkit-transform: rotate(360deg); 
+        transform:rotate(360deg); 
+    } 
+}
   `,
 })
 export class ProjectComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
+  private readonly titleService = inject(TitleService);
   project$ = this.projectService.project$;
   tasks?: (Task & { totalTime: string })[];
   totalTime?: string;
+
+  interval: any;
 
   constructor(private readonly dialog: MatDialog) {}
 
   ngOnInit() {
     this.projectService.projectInfo$.subscribe((projectInfo) => {
       this.tasks = projectInfo.tasks.map((task) => {
-        return { ...task, totalTime: this.getTotalTime(task.time) };
+        return {
+          ...task,
+          totalTime: this.getTotalTime(task.time),
+        };
       });
+
       this.totalTime = this.getTotalTime(
         this.tasks.flatMap((task) => task.time)
       );
+
+      if (this.tasks.flatMap((task) => task.time).some((t) => !t.end)) {
+        this.notifyTitle();
+      } else {
+        this.resetTitle();
+      }
     });
   }
 
@@ -141,7 +191,25 @@ export class ProjectComponent implements OnInit {
     this.projectService.addStartTimerOfCurrentTask(taskId);
   }
 
+  private notifyTitle() {
+    let ok = true;
+    this.interval = setInterval(() => {
+      if (ok) {
+        this.titleService.setTitleName('Task in progress');
+      } else {
+        this.titleService.resetTitleName();
+      }
+      ok = !ok;
+    }, 1000);
+  }
+
+  private resetTitle() {
+    clearInterval(this.interval);
+    this.titleService.resetTitleName();
+  }
+
   onClickEndTimer(taskId: string) {
     this.projectService.addEndTimerOfCurrentTask(taskId);
+    this.resetTitle();
   }
 }
