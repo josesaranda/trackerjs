@@ -2,21 +2,29 @@
   <button mat-icon-button (click)="drawer.toggle()">
     <mat-icon>menu</mat-icon>
   </button>
-  <span class="font-mono">Trackerjs</span>
+  <h1 class="!font-mono !text-inherit relative z-0">
+    Tracker<span class="text-slate-600">js</span>
+    <span
+      class="-z-10 absolute right-[-3px] opacity-40 top-0 bg-slate-400 h-[32px] w-[32px] rounded translate-1/2"
+    ></span>
+  </h1>
   <span class="spacer"></span>
-  <button mat-flat-button (click)="onClickAddProject()">
-    <mat-icon>add</mat-icon>
-    <span>Add project</span>
-  </button>
 </mat-toolbar>
 <mat-drawer-container class="drawer-container">
-  <mat-drawer #drawer class="!bg-slate-100" mode="side" opened>
-    <h2
-      class="flex justify-center items-center !m-0 !text-xl !text-slate-500 !font-mono h-[64px]"
+  <mat-drawer
+    #drawer
+    class="!bg-slate-100"
+    [mode]="opened ? 'side' : 'over'"
+    [opened]="opened"
+  >
+    <div
+      class="flex justify-between items-center !text-slate-500 h-[64px] px-4 border-slate-300 border-b-2"
     >
-      Projects
-    </h2>
-    <mat-divider></mat-divider>
+      <h2 class="!text-xl !font-mono !m-0">Projects</h2>
+      <button mat-icon-button (click)="onClickAddProject()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
     <form [formGroup]="form">
       <mat-selection-list formControlName="project" [multiple]="false">
         @for (project of projects$ | async; track project.id; let index =

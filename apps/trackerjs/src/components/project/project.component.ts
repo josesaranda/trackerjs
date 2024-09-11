@@ -7,7 +7,6 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AddTaskComponent } from '../task/add-task.component';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { Task, TimeTrack } from '../../models/project';
 import { TitleService } from '../../services/title.service';
@@ -29,13 +28,27 @@ import { TitleService } from '../../services/title.service';
   template: `
     <mat-toolbar class="gap-2 !bg-slate-200">
       @if(project$ | async; as project) {
-      <span class="font-mono !text-md">{{ project.name }}</span>
+      <span class="!text-base md:!text-lg">{{ project.name }}</span>
       }
       <span class="spacer"></span>
-      <span class="!text-lg">Time tracked: {{ totalTime }}</span>
-      <button mat-raised-button (click)="onClickAddTask()">
+      <div class="flex justify-center items-center gap-2">
+        <mat-icon>access_time</mat-icon>
+        <span class="!text-base md:!text-lg">{{ totalTime }}</span>
+      </div>
+      <button
+        class="!hidden md:!flex"
+        mat-raised-button
+        (click)="onClickAddTask()"
+      >
         <mat-icon>add</mat-icon>
         <span>Add task</span>
+      </button>
+      <button
+        class="inline-block md:!hidden"
+        mat-icon-button
+        (click)="onClickAddTask()"
+      >
+        <mat-icon>add</mat-icon>
       </button>
     </mat-toolbar>
     <div class="p-4">

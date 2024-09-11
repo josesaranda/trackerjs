@@ -41,6 +41,7 @@ export class AppComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  opened = !window.matchMedia('(max-width: 768px)').matches;
 
   form: FormGroup;
   projects$ = this.projectService.projects$;
@@ -57,6 +58,12 @@ export class AppComponent implements OnInit {
         this.projectService.setSelectedProject(value);
         this.router.navigate([value]);
       }
+    });
+
+    const mql = window.matchMedia('(max-width: 768px)');
+    mql.addEventListener('change', (e) => {
+      console.log('changes', e.matches);
+      this.opened = !e.matches;
     });
   }
 

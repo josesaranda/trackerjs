@@ -12,6 +12,6 @@ body {
   margin: 0;
 }
 
-* {
-  @apply font-mono;
+*:not(mat-icon) {
+  @apply font-mono #{!important};
 }
